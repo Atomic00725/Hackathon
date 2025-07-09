@@ -132,7 +132,31 @@ def get_latest_score(user_id):
         "severity": severity
     })
 
+## for userAnalytics page
+@app.route("/user-scores/<int:user_id>", methods=["GET"])
+def user_scores(user_id):
+    scores = Score.query.filter_by(user_id=user_id).order_by(Score.id.asc()).all()
+    if not scores:
+        return jsonify({"error": "No scores found"}), 404
 
+    data = [
+        {"id": s.id, "score": s.score}
+        for s in scores
+    ]
+
+    return jsonify(data)
+
+@app.route("/user/<int:user_id>", methods=["GET"])
+def get_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify({
+        "id": user.id,
+        "fullname": user.full_name,
+        "email": user.email
+    })
 
 
 if __name__ == "__main__":
