@@ -26,6 +26,7 @@ export default function Questionnaire() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [severity, setSeverity] = useState(null);
+  const [advice, setAdvice] = useState(""); // NEW
 
   const handleOptionChange = (score) => {
     const newAnswers = [...answers];
@@ -42,26 +43,22 @@ export default function Questionnaire() {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      // Prepare payload for backend
-    const user_id = localStorage.getItem("user_id");
+      const user_id = localStorage.getItem("user_id");
 
-    const payload = { user_id };
-    answers.forEach((val, i) => {
-      payload[`Q${i + 1}`] = val;
-    });
+      const payload = { user_id };
+      answers.forEach((val, i) => {
+        payload[`Q${i + 1}`] = val;
+      });
 
-
-      // Send to Flask backend
       fetch("http://localhost:5000/predict", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
         .then((res) => res.json())
         .then((data) => {
           setSeverity(data.severity);
+          setAdvice(data.advice); // NEW
           setSubmitted(true);
         })
         .catch((err) => {
@@ -75,7 +72,7 @@ export default function Questionnaire() {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
     } else {
-      setStarted(false); // Back to intro
+      setStarted(false);
     }
   };
 
@@ -104,8 +101,16 @@ export default function Questionnaire() {
             Your predicted severity is: <strong>{severity}</strong>
           </p>
           <p style={styles.note}>
-            This result is generated based on your answers. If you're feeling overwhelmed, consider speaking with a mental health professional.
+            This result is generated based on your answers. If you're feeling overwhelmed,
+            consider speaking with a mental health professional.
           </p>
+
+          {advice && (
+            <div style={styles.adviceBox}>
+              <h3 style={styles.adviceTitle}>Personalized Advice</h3>
+              <p style={styles.adviceText}>{advice}</p>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -272,5 +277,24 @@ const styles = {
   note: {
     fontSize: "1.1rem",
     color: "#6b4f9a",
+  },
+  adviceBox: {
+    marginTop: 30,
+    padding: 20,
+    backgroundColor: "#f5e9ff",
+    borderRadius: 16,
+    boxShadow: "0 4px 12px rgba(167, 97, 214, 0.2)",
+    textAlign: "left",
+  },
+  adviceTitle: {
+    fontSize: "1.3rem",
+    fontWeight: "700",
+    marginBottom: 10,
+    color: "#5b3d7a",
+  },
+  adviceText: {
+    fontSize: "1.05rem",
+    color: "#4a2a7a",
+    whiteSpace: "pre-wrap",
   },
 };
