@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Markdown from "react-markdown";
-import ClipLoader from "react-spinners/ClipLoader"; 
+import ClipLoader from "react-spinners/ClipLoader";
 
 const questions = [
   "I feel overwhelmed by my daily responsibilities.",
@@ -29,7 +29,9 @@ export default function Questionnaire() {
   const [submitted, setSubmitted] = useState(false);
   const [severity, setSeverity] = useState(null);
   const [advice, setAdvice] = useState("");
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("summary");
+  const [mapsLink, setMapsLink] = useState("");
 
   const handleOptionChange = (score) => {
     const newAnswers = [...answers];
@@ -52,7 +54,7 @@ export default function Questionnaire() {
         payload[`Q${i + 1}`] = val;
       });
 
-      setLoading(true); 
+      setLoading(true);
 
       fetch("http://localhost:5000/predict", {
         method: "POST",
@@ -70,7 +72,7 @@ export default function Questionnaire() {
           alert("Something went wrong. Please try again.");
         })
         .finally(() => {
-          setLoading(false); 
+          setLoading(false);
         });
     }
   };
@@ -83,14 +85,27 @@ export default function Questionnaire() {
     }
   };
 
- 
+  const findNearby = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const { latitude, longitude } = position.coords;
+        const link = `https://www.google.com/maps/search/mental+health+clinics/@${latitude},${longitude},14z`;
+        setMapsLink(link);
+      }, () => {
+        alert("Could not get location.");
+      });
+    } else {
+      alert("Geolocation not supported by your browser.");
+    }
+  };
+
   if (loading) {
     return (
       <div style={styles.page}>
         <div style={styles.container}>
           <h2 style={styles.title}>Please wait...</h2>
           <p style={styles.subtitle}>Analyzing your answers and generating result.</p>
-          <ClipLoader color="#a761d6" size={60} /> {/* ✅ Spinner */}
+          <ClipLoader color="#a761d6" size={60} />
         </div>
       </div>
     );
@@ -116,19 +131,60 @@ export default function Questionnaire() {
     return (
       <div style={styles.page}>
         <div style={styles.container}>
-          <h1 style={styles.title}>Thank you for submitting!</h1>
-          <p style={styles.resultText}>
-            Your predicted severity is: <strong>{severity}</strong>
-          </p>
-          <p style={styles.note}>
-            This result is generated based on your answers. If you're feeling overwhelmed,
-            consider speaking with a mental health professional.
-          </p>
+          <h1 style={styles.title}>Your Results</h1>
 
-          {advice && (
+          <div style={styles.tabs}>
+            <button
+              style={{ ...styles.tab, ...(activeTab === "summary" ? styles.activeTab : {}) }}
+              onClick={() => setActiveTab("summary")}
+            >
+              Summary
+            </button>
+            <button
+              style={{ ...styles.tab, ...(activeTab === "advice" ? styles.activeTab : {}) }}
+              onClick={() => setActiveTab("advice")}
+            >
+              Advice
+            </button>
+            <button
+              style={{ ...styles.tab, ...(activeTab === "nearby" ? styles.activeTab : {}) }}
+              onClick={() => setActiveTab("nearby")}
+            >
+              Nearby Help
+            </button>
+          </div>
+
+          {activeTab === "summary" && (
+            <div>
+              <p style={styles.resultText}>
+                Your predicted severity is: <strong>{severity}</strong>
+              </p>
+              <p style={styles.note}>
+                This result is based on your answers. If you're feeling overwhelmed,
+                consider speaking with a mental health professional.
+              </p>
+            </div>
+          )}
+
+          {activeTab === "advice" && (
             <div style={styles.adviceBox}>
               <h3 style={styles.adviceTitle}>Personalized Advice</h3>
               <Markdown style={styles.adviceText}>{advice}</Markdown>
+            </div>
+          )}
+
+          {activeTab === "nearby" && (
+            <div>
+              <button style={styles.navButton} onClick={findNearby}>
+                Find Nearby Practitioners
+              </button>
+              {mapsLink && (
+                <p style={{ marginTop: "1rem" }}>
+                  <a href={mapsLink} target="_blank" rel="noopener noreferrer">
+                    Open in Google Maps
+                  </a>
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -205,7 +261,7 @@ const styles = {
     textAlign: "center",
   },
   title: {
-    fontSize: "2.8rem",
+    fontSize: "2.4rem",
     fontWeight: "700",
     marginBottom: 15,
   },
@@ -225,7 +281,25 @@ const styles = {
     cursor: "pointer",
     boxShadow: "0 10px 28px rgba(167, 97, 214, 0.7)",
     transition: "background-color 0.3s ease",
-    fontFamily: "'Montserrat', sans-serif",
+  },
+  tabs: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 10,
+    marginBottom: 20,
+  },
+  tab: {
+    padding: "10px 20px",
+    border: "2px solid #a761d6",
+    borderRadius: 10,
+    background: "white",
+    color: "#a761d6",
+    cursor: "pointer",
+    fontWeight: "600",
+  },
+  activeTab: {
+    background: "#a761d6",
+    color: "white",
   },
   question: {
     fontSize: "1.8rem",
@@ -266,7 +340,6 @@ const styles = {
     border: "2.5px solid #a761d6",
     backgroundColor: "white",
     boxShadow: "0 0 2px rgba(167, 97, 214, 0.7)",
-    transition: "all 0.3s ease",
     flexShrink: 0,
   },
   buttons: {
@@ -287,7 +360,6 @@ const styles = {
     cursor: "pointer",
     boxShadow: "0 10px 28px rgba(167, 97, 214, 0.7)",
     transition: "background-color 0.3s ease",
-    fontFamily: "'Montserrat', sans-serif",
   },
   resultText: {
     fontSize: "1.4rem",
@@ -299,7 +371,7 @@ const styles = {
     color: "#6b4f9a",
   },
   adviceBox: {
-    marginTop: 30,
+    marginTop: 10,
     padding: 20,
     backgroundColor: "#f5e9ff",
     borderRadius: 16,
@@ -315,6 +387,5 @@ const styles = {
   adviceText: {
     fontSize: "1.05rem",
     color: "#4a2a7a",
-    whiteSpace: "pre-wrap",
   },
 };
