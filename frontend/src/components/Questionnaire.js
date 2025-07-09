@@ -1,6 +1,26 @@
-import { useState } from "react";
-import Markdown from "react-markdown";
+import React, { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import ClipLoader from "react-spinners/ClipLoader";
+
+// Simple Map Component using iframe
+const SimpleMap = ({ location }) => {
+  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${location.lng - 0.01},${location.lat - 0.01},${location.lng + 0.01},${location.lat + 0.01}&layer=mapnik&marker=${location.lat},${location.lng}`;
+  return (
+    <div style={styles.mapContainer}>
+      <iframe
+        width="100%"
+        height="300"
+        frameBorder="0"
+        scrolling="no"
+        marginHeight="0"
+        marginWidth="0"
+        src={mapUrl}
+        style={{ borderRadius: "16px" }}
+        title="Location Map"
+      />
+    </div>
+  );
+};
 
 const questions = [
   "I feel overwhelmed by my daily responsibilities.",
@@ -32,6 +52,7 @@ export default function Questionnaire() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("summary");
   const [mapsLink, setMapsLink] = useState("");
+  const [location, setLocation] = useState(null);
 
   const handleOptionChange = (score) => {
     const newAnswers = [...answers];
@@ -48,7 +69,7 @@ export default function Questionnaire() {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      const user_id = localStorage.getItem("user_id");
+      const user_id = localStorage.getItem("user_id") || "user_" + Date.now();
       const payload = { user_id };
       answers.forEach((val, i) => {
         payload[`Q${i + 1}`] = val;
@@ -87,13 +108,18 @@ export default function Questionnaire() {
 
   const findNearby = () => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const { latitude, longitude } = position.coords;
-        const link = `https://www.google.com/maps/search/mental+health+clinics/@${latitude},${longitude},14z`;
-        setMapsLink(link);
-      }, () => {
-        alert("Could not get location.");
-      });
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const link = `https://www.google.com/maps/search/mental+health+clinics/@${latitude},${longitude},14z`;
+          setMapsLink(link);
+          setLocation({ lat: latitude, lng: longitude });
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          alert("Could not get location. Please check your browser settings and try again.");
+        }
+      );
     } else {
       alert("Geolocation not supported by your browser.");
     }
@@ -169,7 +195,7 @@ export default function Questionnaire() {
           {activeTab === "advice" && (
             <div style={styles.adviceBox}>
               <h3 style={styles.adviceTitle}>Personalized Advice</h3>
-              <Markdown style={styles.adviceText}>{advice}</Markdown>
+              <ReactMarkdown style={styles.adviceText}>{advice}</ReactMarkdown>
             </div>
           )}
 
@@ -178,10 +204,20 @@ export default function Questionnaire() {
               <button style={styles.navButton} onClick={findNearby}>
                 Find Nearby Practitioners
               </button>
+
+              {location && (
+                <div style={{ marginTop: "20px" }}>
+                  <SimpleMap location={location} />
+                  <p style={styles.locationText}>
+                    📍 Your location: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                  </p>
+                </div>
+              )}
+
               {mapsLink && (
                 <p style={{ marginTop: "1rem" }}>
-                  <a href={mapsLink} target="_blank" rel="noopener noreferrer">
-                    Open in Google Maps
+                  <a href={mapsLink} target="_blank" rel="noopener noreferrer" style={styles.mapsLink}>
+                    🗺️ Show more nearby clinics on Google Maps →
                   </a>
                 </p>
               )}
@@ -198,6 +234,18 @@ export default function Questionnaire() {
         <h2 style={styles.question}>
           {currentQuestion + 1}. {questions[currentQuestion]}
         </h2>
+
+        <div style={styles.progress}>
+          <div
+            style={{
+              ...styles.progressBar,
+              width: `${((currentQuestion + 1) / questions.length) * 100}%`,
+            }}
+          ></div>
+          <span style={styles.progressText}>
+            {currentQuestion + 1} of {questions.length}
+          </span>
+        </div>
 
         <div style={styles.options}>
           {options.map(({ label, score }) => {
@@ -306,11 +354,34 @@ const styles = {
     fontWeight: "600",
     marginBottom: 25,
   },
+  progress: {
+    width: "100%",
+    height: "6px",
+    backgroundColor: "#e0e0e0",
+    borderRadius: "3px",
+    marginBottom: 20,
+    position: "relative",
+    overflow: "hidden",
+  },
+  progressBar: {
+    height: "100%",
+    backgroundColor: "#a761d6",
+    borderRadius: "3px",
+    transition: "width 0.3s ease",
+  },
+  progressText: {
+    position: "absolute",
+    top: "10px",
+    right: "0",
+    fontSize: "0.9rem",
+    color: "#6b4f9a",
+  },
   options: {
     display: "flex",
     flexDirection: "column",
     gap: 16,
     marginBottom: 40,
+    marginTop: 30,
   },
   optionLabel: {
     fontSize: "1.1rem",
@@ -387,5 +458,21 @@ const styles = {
   adviceText: {
     fontSize: "1.05rem",
     color: "#4a2a7a",
+  },
+  mapContainer: {
+    borderRadius: "16px",
+    overflow: "hidden",
+    boxShadow: "0 4px 12px rgba(167, 97, 214, 0.2)",
+  },
+  locationText: {
+    fontSize: "0.9rem",
+    color: "#6b4f9a",
+    marginTop: "10px",
+    fontStyle: "italic",
+  },
+  mapsLink: {
+    color: "#a761d6",
+    textDecoration: "none",
+    fontWeight: "600",
   },
 };
