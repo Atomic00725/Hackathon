@@ -33,32 +33,32 @@ A web-based application that analyzes the **anxiety level** of users based on th
 ## 🧰 Tech Stack
 
 | Layer        | Technology            |
-|--------------|------------------------|
-| Frontend     | React.js               |
-| Backend      | Flask (Python)         |
+|--------------|----------------------|
+| Frontend     | React.js             |
+| Backend      | Flask (Python)       |
 | ML Model     | Random Forest Classifier |
-| Database     | SQLite                 |
-| Charts       |  Recharts   |
+| Database     | SQLite               |
+| Charts       | Chart.js or Recharts |
 
 ---
 
 ## 🔍 How It Works
 
-1. **User fills out a mental health questionnaire**
-2. **Responses are sent to the Flask backend**
-3. **Model predicts the anxiety level (None/Mild/Moderate/Severe)**
-4. **Prediction is saved to the database for future reference**
-5. **Advice is generated based on the result**
-6. **Nearby mental health centers are suggested**
+1. **User fills out a mental health questionnaire**  
+2. **Responses are sent to the Flask backend**  
+3. **Model predicts the anxiety level (None/Mild/Moderate/Severe)**  
+4. **Prediction is saved to the database for future reference**  
+5. **Advice is generated based on the result**  
+6. **Nearby mental health centers are suggested**  
 7. **User can view historical analytics of their anxiety scores**
 
 ---
 
 ## 📈 Model Performance
 
-- **Model Used**: Random Forest Classifier
-- **Accuracy**: 89%
-- **Input Features**: Responses from the questionnaire
+- **Model Used**: Random Forest Classifier  
+- **Accuracy**: 89%  
+- **Input Features**: Responses from the questionnaire  
 - **Output Classes**: `None`, `Mild`, `Moderate`, `Severe`
 
 ---
@@ -67,23 +67,30 @@ A web-based application that analyzes the **anxiety level** of users based on th
 
 ### Prerequisites
 
-- Python 3.x
-- Node.js + npm
-- SQLite
+- Python 3.x  
+- Node.js + npm  
+- SQLite  
 - `pip` and `virtualenv`
 
 ---
 
-### Backend Setup (Flask)
+### Setup and Run Backend & Frontend
 
 ```bash
+# Backend setup
 cd backend
 python -m venv venv
-venv\Scripts\activate         # For Windows
-source venv/bin/activate     # For Mac/Linux
 
-### 🖥️ Frontend Setup (React)
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
 
-cd frontend                         # Navigate to frontend folder
-npm install                         # Install all required dependencies
-npm start                           # Start the React development server
+pip install -r requirements.txt
+python app.py
+
+# Frontend setup
+cd frontend
+npm install
+npm start
