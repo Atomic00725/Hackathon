@@ -1,4 +1,6 @@
 import { useState } from "react";
+import Markdown from "react-markdown";
+import ClipLoader from "react-spinners/ClipLoader"; 
 
 const questions = [
   "I feel overwhelmed by my daily responsibilities.",
@@ -26,7 +28,8 @@ export default function Questionnaire() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [severity, setSeverity] = useState(null);
-  const [advice, setAdvice] = useState(""); // NEW
+  const [advice, setAdvice] = useState("");
+  const [loading, setLoading] = useState(false); 
 
   const handleOptionChange = (score) => {
     const newAnswers = [...answers];
@@ -44,11 +47,12 @@ export default function Questionnaire() {
       setCurrentQuestion(currentQuestion + 1);
     } else {
       const user_id = localStorage.getItem("user_id");
-
       const payload = { user_id };
       answers.forEach((val, i) => {
         payload[`Q${i + 1}`] = val;
       });
+
+      setLoading(true); 
 
       fetch("http://localhost:5000/predict", {
         method: "POST",
@@ -58,12 +62,15 @@ export default function Questionnaire() {
         .then((res) => res.json())
         .then((data) => {
           setSeverity(data.severity);
-          setAdvice(data.advice); // NEW
+          setAdvice(data.advice);
           setSubmitted(true);
         })
         .catch((err) => {
           console.error("Error sending data:", err);
           alert("Something went wrong. Please try again.");
+        })
+        .finally(() => {
+          setLoading(false); 
         });
     }
   };
@@ -75,6 +82,19 @@ export default function Questionnaire() {
       setStarted(false);
     }
   };
+
+ 
+  if (loading) {
+    return (
+      <div style={styles.page}>
+        <div style={styles.container}>
+          <h2 style={styles.title}>Please wait...</h2>
+          <p style={styles.subtitle}>Analyzing your answers and generating result.</p>
+          <ClipLoader color="#a761d6" size={60} /> {/* ✅ Spinner */}
+        </div>
+      </div>
+    );
+  }
 
   if (!started) {
     return (
@@ -108,7 +128,7 @@ export default function Questionnaire() {
           {advice && (
             <div style={styles.adviceBox}>
               <h3 style={styles.adviceTitle}>Personalized Advice</h3>
-              <p style={styles.adviceText}>{advice}</p>
+              <Markdown style={styles.adviceText}>{advice}</Markdown>
             </div>
           )}
         </div>
