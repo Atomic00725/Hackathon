@@ -1,0 +1,89 @@
+# 🧠 Mental Health Analyzer
+
+A web-based application that analyzes the **anxiety level** of users based on their responses to a questionnaire. The system categorizes the result into **None**, **Mild**, **Moderate**, or **Severe**, provides personalized advice, suggests nearby mental health centers, and shows **analytics based on the user's past scores**.
+
+---
+
+## 📌 Features
+
+- 📝 **Anxiety Questionnaire**  
+  User-friendly questionnaire to assess mental health status.
+
+- 📊 **ML-Based Prediction**  
+  Uses a **Random Forest Classifier** trained on relevant data to predict the user's anxiety level with **89% accuracy**.
+
+- 🧾 **Severity Categorization**  
+  Classifies results into:
+  - None
+  - Mild
+  - Moderate
+  - Severe
+
+- 💡 **Personalized Advice**  
+  Offers tips and coping strategies based on the anxiety level.
+
+- 🏥 **Nearby Health Centre Suggestions**  
+  Recommends mental health centers based on user location.
+
+- 📈 **User Analytics Dashboard**  
+  Shows progress over time with visual charts of past scores to help users track their mental health trends.
+
+---
+
+## 🧰 Tech Stack
+
+| Layer        | Technology            |
+|--------------|------------------------|
+| Frontend     | React.js               |
+| Backend      | Flask (Python)         |
+| ML Model     | Random Forest Classifier |
+| Database     | SQLite                 |
+| Charts       |  Recharts   |
+
+---
+
+## 🔍 How It Works
+
+1. **User fills out a mental health questionnaire**
+2. **Responses are sent to the Flask backend**
+3. **Model predicts the anxiety level (None/Mild/Moderate/Severe)**
+4. **Prediction is saved to the database for future reference**
+5. **Advice is generated based on the result**
+6. **Nearby mental health centers are suggested**
+7. **User can view historical analytics of their anxiety scores**
+
+---
+
+## 📈 Model Performance
+
+- **Model Used**: Random Forest Classifier
+- **Accuracy**: 89%
+- **Input Features**: Responses from the questionnaire
+- **Output Classes**: `None`, `Mild`, `Moderate`, `Severe`
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.x
+- Node.js + npm
+- SQLite
+- `pip` and `virtualenv`
+
+---
+
+### Backend Setup (Flask)
+
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate         # For Windows
+source venv/bin/activate     # For Mac/Linux
+
+### 🖥️ Frontend Setup (React)
+
+cd frontend                         # Navigate to frontend folder
+npm install                         # Install all required dependencies
+npm start                           # Start the React development server
