@@ -38,7 +38,7 @@ A web-based application that analyzes the **anxiety level** of users based on th
 | Backend      | Flask (Python)       |
 | ML Model     | Random Forest Classifier |
 | Database     | SQLite               |
-| Charts       | Chart.js or Recharts |
+| Charts       | Recharts |
 
 ---
 
